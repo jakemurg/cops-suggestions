@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Cops Team Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: one question per full screen, Typeform-style, with a thin progress bar and a bottom nav; owner-only responses drawer */
+:root{
+  --bg:#F3F5F2; --surface:#FFFFFF; --fg:#16211D; --muted:#5D6B65; --line:#D5DDD8;
+  --accent:#1F6F5C; --accent-fg:#FFFFFF; --accent-soft:#DCEBE5; --danger:#B3402F;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111816; --surface:#19221F; --fg:#E7EEEA; --muted:#97A69F; --line:#2D3A35;
+  --accent:#5CC2A2; --accent-fg:#0D1A15; --accent-soft:#1E3A31; --danger:#F08A78; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111816; --surface:#19221F; --fg:#E7EEEA; --muted:#97A69F; --line:#2D3A35;
+  --accent:#5CC2A2; --accent-fg:#0D1A15; --accent-soft:#1E3A31; --danger:#F08A78; color-scheme:dark}
+
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+code{font-size:.9em}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;overflow-x:hidden}
+.progress{position:fixed;top:0;left:0;right:0;height:4px;background:var(--line);z-index:5;margin-top:env(safe-area-inset-top,0px)}
+.progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .4s ease}
+.stage{min-height:100%;display:flex;align-items:center;padding-inline:20px;padding-block:72px 120px}
+.screen{width:100%;max-width:680px;margin:0 auto;display:none}
+.screen.active{display:block;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+@keyframes rise{from{opacity:.0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.screen.active{animation:none}.progress i{transition:none}}
+
+.qnum{display:flex;align-items:center;gap:8px;color:var(--accent);font-weight:600;font-size:15px;margin-bottom:10px}
+.qnum svg{width:14px;height:14px}
+h1,h2{font-family:var(--display);font-weight:700;letter-spacing:-.01em;text-wrap:balance;margin:0}
+h1{font-size:clamp(32px,6vw,48px);line-height:1.08}
+h2{font-size:clamp(24px,4.4vw,32px);line-height:1.18;font-weight:500}
+.help{color:var(--muted);font-size:17px;margin:12px 0 0;max-width:58ch}
+.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:16px}
+
+.field{margin-top:28px}
+input[type=text],textarea{width:100%;background:transparent;border:0;border-bottom:2px solid var(--line);color:var(--fg);font:500 clamp(20px,3.4vw,26px)/1.4 var(--body);padding:8px 0;outline:none;resize:none;transition:border-color .2s}
+input[type=text]:focus,textarea:focus{border-bottom-color:var(--accent)}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:.6}
+textarea{min-height:3.2em;overflow:hidden}
+.err{color:var(--danger);font-size:14px;margin-top:8px;min-height:1.2em}
+
+.actions{display:flex;align-items:center;gap:14px;margin-top:28px;flex-wrap:wrap}
+.btn{appearance:none;border:0;border-radius:6px;background:var(--accent);color:var(--accent-fg);font:600 18px var(--body);padding:10px 20px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:filter .15s,transform .1s}
+.btn:hover{filter:brightness(1.08)}.btn:active{transform:translateY(1px)}
+.btn:focus-visible,.nav button:focus-visible,.link:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.btn[disabled]{opacity:.55;cursor:default}
+.hint{color:var(--muted);font-size:13px}
+.hint kbd{font:600 12px var(--body);border:1px solid var(--line);border-radius:4px;padding:1px 5px;background:var(--surface)}
+.notice{margin-top:22px;padding:12px 14px;border-radius:6px;background:var(--accent-soft);color:var(--fg);font-size:15px;max-width:58ch}
+
+.nav{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom,0px));display:flex;gap:2px;z-index:5}
+.nav button{appearance:none;border:0;background:var(--accent);color:var(--accent-fg);width:40px;height:36px;cursor:pointer;display:grid;place-items:center}
+.nav button:first-child{border-radius:6px 0 0 6px}.nav button:last-child{border-radius:0 6px 6px 0}
+.nav button[disabled]{opacity:.4;cursor:default}
+.nav svg{width:16px;height:16px}
+
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"><i id="bar"></i></div>
+
+<main class="stage">
+  <section class="screen active" data-step="0">
+    <div class="eyebrow">Customer Operations · Team survey</div>
+    <h1>Help us make Cops work smoother.</h1>
+    <p class="help">Four short questions about the processes and tools you use every day. It takes about 3 minutes, and your answers go straight to the team lead.</p>
+    <div class="actions">
+      <button class="btn" type="button" data-next>Start</button>
+      <span class="hint">press <kbd>Enter ↵</kbd></span>
+    </div>
+    <div class="notice" id="setup" hidden>This survey isn't connected to a response inbox yet. Add your Formspree form ID to <code>FORM_ENDPOINT</code> in index.html.</div>
+  </section>
+
+  <section class="screen" data-step="1">
+    <div class="qnum">1 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+    <h2><label for="q-name">What's your name?</label></h2>
+    <div class="field"><input id="q-name" type="text" autocomplete="name" placeholder="Type your answer here…" maxlength="120"></div>
+    <div class="err" id="err-1" role="alert"></div>
+    <div class="actions"><button class="btn" type="button" data-next>OK</button><span class="hint">press <kbd>Enter ↵</kbd></span></div>
+  </section>
+
+  <section class="screen" data-step="2">
+    <div class="qnum">2 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+    <h2><label for="q-friction">Which processes or tools are causing you friction?</label></h2>
+    <p class="help">Think about anything that slows you down: a slow system, too many tabs, manual copy-pasting, unclear handoffs, approvals that stall.</p>
+    <div class="field"><textarea id="q-friction" rows="1" placeholder="Type your answer here…"></textarea></div>
+    <div class="err" id="err-2" role="alert"></div>
+    <div class="actions"><button class="btn" type="button" data-next>OK</button><span class="hint"><kbd>Shift ⇧</kbd> + <kbd>Enter ↵</kbd> for a new line</span></div>
+  </section>
+
+  <section class="screen" data-step="3">
+    <div class="qnum">3 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+    <h2><label for="q-problems">What current problems do you think could be improved?</label></h2>
+    <p class="help">Recurring customer issues, queue pain points, gaps in knowledge or training. Anything that keeps coming up.</p>
+    <div class="field"><textarea id="q-problems" rows="1" placeholder="Type your answer here…"></textarea></div>
+    <div class="err" id="err-3" role="alert"></div>
+    <div class="actions"><button class="btn" type="button" data-next>OK</button><span class="hint"><kbd>Shift ⇧</kbd> + <kbd>Enter ↵</kbd> for a new line</span></div>
+  </section>
+
+  <section class="screen" data-step="4">
+    <div class="qnum">4 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+    <h2><label for="q-suggestions">Do you have any suggestions for improvements?</label></h2>
+    <p class="help">Big or small. A new tool, a tweak to a process, something another team does well. Optional, but very welcome.</p>
+    <div class="field"><textarea id="q-suggestions" rows="1" placeholder="Type your answer here…"></textarea></div>
+    <div class="err" id="err-4" role="alert"></div>
+    <div class="actions"><button class="btn" type="button" id="submit">Submit</button><span class="hint">press <kbd>Ctrl</kbd> + <kbd>Enter ↵</kbd></span></div>
+  </section>
+
+  <section class="screen" data-step="5">
+    <div class="eyebrow">All done</div>
+    <h1 id="thanks-title">Thanks for your feedback.</h1>
+    <p class="help">Your answers have been sent to the team lead. If you think of something else, you can submit the survey again.</p>
+    <div class="actions"><button class="btn" type="button" id="edit">Start a new response</button></div>
+  </section>
+</main>
+
+<nav class="nav" aria-label="Question navigation">
+  <button type="button" id="prev" aria-label="Previous question"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10l4-4 4 4"/></svg></button>
+  <button type="button" id="nextBtn" aria-label="Next question"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg></button>
+</nav>
+
+<script>
+(() => {
+  // Paste your Formspree endpoint here, e.g. "https://formspree.io/f/abcdwxyz"
+  const FORM_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID";
+
+  const LAST = 4, DONE = 5;
+  const screens = [...document.querySelectorAll('.screen')];
+  const $ = id => document.getElementById(id);
+  const fields = { name: $('q-name'), friction: $('q-friction'), problems: $('q-problems'), suggestions: $('q-suggestions') };
+  const required = { 1: 'name', 2: 'friction', 3: 'problems' };
+  const configured = !FORM_ENDPOINT.includes('YOUR_FORM_ID');
+  let step = 0, submitting = false;
+  if (!configured) $('setup').hidden = false;
+
+  function show(n) {
+    step = Math.max(0, Math.min(DONE, n));
+    screens.forEach(s => s.classList.toggle('active', +s.dataset.step === step));
+    $('bar').style.width = (step === DONE ? 100 : Math.min(step, LAST) / LAST * 100) + '%';
+    $('prev').disabled = step === 0 || step === DONE;
+    $('nextBtn').disabled = step >= LAST;
+    const f = screens[step].querySelector('input,textarea');
+    if (f) setTimeout(() => { f.focus(); autosize(f); }, 60);
+  }
+  function validate(n) {
+    const key = required[n]; const err = $('err-' + n);
+    if (err) err.textContent = '';
+    if (key && !fields[key].value.trim()) { err.textContent = 'Please fill this in before moving on.'; fields[key].focus(); return false; }
+    return true;
+  }
+  function next() { if (step === 0 || validate(step)) { if (step === LAST) return submit(); show(step + 1); } }
+  function autosize(t) { if (t.tagName !== 'TEXTAREA') return; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
+
+  document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', next));
+  $('nextBtn').addEventListener('click', next);
+  $('prev').addEventListener('click', () => show(step - 1));
+  $('submit').addEventListener('click', submit);
+  $('edit').addEventListener('click', () => { Object.values(fields).forEach(f => f.value = ''); show(1); });
+  Object.values(fields).forEach(f => f.addEventListener('input', () => { autosize(f); const e = $('err-' + step); if (e) e.textContent = ''; }));
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const inTextarea = e.target.tagName === 'TEXTAREA';
+    if (inTextarea && e.shiftKey) return;
+    if (e.target.tagName === 'BUTTON') return;
+    if (step === LAST && inTextarea && !(e.ctrlKey || e.metaKey)) return;
+    if (step === DONE) return;
+    e.preventDefault(); next();
+  });
+
+  async function submit() {
+    if (submitting) return;
+    for (const n of [1, 2, 3]) if (!validate(n)) { show(n); setTimeout(() => validate(n), 80); return; }
+    const err = $('err-4'); err.textContent = '';
+    if (!configured) { err.textContent = 'This survey isn’t connected to a response inbox yet, so answers can’t be sent.'; return; }
+    submitting = true; $('submit').disabled = true; $('submit').textContent = 'Submitting…';
+    const data = {
+      name: fields.name.value.trim().slice(0, 120),
+      friction: fields.friction.value.trim().slice(0, 5000),
+      problems: fields.problems.value.trim().slice(0, 5000),
+      suggestions: fields.suggestions.value.trim().slice(0, 5000),
+      _subject: 'Cops team survey response'
+    };
+    try {
+      const res = await fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(data) });
+      if (!res.ok) throw new Error(res.status);
+      $('thanks-title').textContent = 'Thanks, ' + data.name.split(' ')[0] + '.';
+      show(DONE);
+    } catch (e) {
+      err.textContent = 'Your response didn’t send. Check your connection and press Submit again.';
+    } finally { submitting = false; $('submit').disabled = false; $('submit').textContent = 'Submit'; }
+  }
+  show(0);
+})();
+</script>
+</body>
+</html>
